@@ -11,11 +11,9 @@ DATE  = $(shell /bin/date "+%Y-%m-%d")
 RED   = \033[0;31m
 CYAN  = \033[0;36m
 NC    = \033[0m
-echoPROJECT = @echo -e "$(CYAN)**** $(PROJECT) ****$(NC) \n"
+echoPROJECT = @echo -e "$(CYAN) <$(PROJECT)>"
 
-
-.PHONY:  all clean cleanall zip install uninstall
-# Just create the PDF
+# default
 all:
 	$(MAKE) article
 	$(MAKE) minimize
@@ -23,14 +21,14 @@ all:
 	$(MAKE) count.colorpages
 	$(echoPROJECT) "$(RED) * all files processed * $(NC)"
 
+# compile article
 article:
 	$(echoPROJECT) "$(RED) * making article * $(NC)"
-	latexmk -lualatex -quiet -f -cd -view=pdf -output-directory=tmp/$(DATE) $(PROJECT).tex
-	@cp tmp/$(DATE)/$(PROJECT).pdf .
+	latexmk -lualatex -quiet -f -cd -view=pdf -output-directory=tmp $(PROJECT).tex
+	@cp tmp/$(PROJECT).pdf .
 	$(echoPROJECT) "$(RED) * article compiled * $(NC)"
 
-
-# zip files up for sending etc.
+# zip files for sending etc.
 zip: article
 	$(echoPROJECT) "$(RED) * start zipping files * $(NC)"
 	@-mkdir archive
@@ -41,7 +39,7 @@ zip: article
 	zip -Drq $(PWD)/archive/$(PROJECT)-$(VERS).zip $(PROJECT)
 	$(echoPROJECT) "$(RED) * files zipped * $(NC)"
 
-
+# count pages with colors > https://stackoverflow.com/a/28369599
 count.colorpages: article
 	$(echoPROJECT) "$(RED) * counting colored pages * $(NC)"
 	@ gs \
@@ -51,13 +49,13 @@ count.colorpages: article
 	|tail -n +5 \
 	|sed '/^Page*/N;s/\n//'\
 	|sed -E '/Page [0-9]+ 0.00000 0.00000 0.00000 / d' \
-	| tee -a  $(PROJECT).csv
-	@echo -e "Pages with color: " | tee  $(PROJECT).csv
+	| tee  $(PROJECT).csv
+	@echo -e "Total amount of pages with color: "
 	@ gs -o - -sDEVICE=inkcov $(PROJECT).pdf | \
 	 grep -v "^ 0.00000  0.00000  0.00000" | grep "^ " | wc -l
 	$(echoPROJECT) "$(RED) * colored pages counted * $(NC)"
 
-
+# minimize PDF
 minimize: article
 	$(echoPROJECT) "$(RED) * minimizing article * $(NC)"
 	@-mkdir archive

@@ -18,7 +18,7 @@ Fassung haben möchte oder wissen muss, auf welchen Seiten Farbinformationen im 
 hinterlegt sind.
 
 Die folgenden Ausführungen beziehen sich auf GNUmake (Unix/macOS).
-Für Windows gibt es eine entsprechende Variante |nmake|.
+Für Windows gibt es eine entsprechende Variante \texttt{nmake}.
 % Abstract ------
 
 
@@ -41,7 +41,7 @@ die man auch im Terminal eingeben kann.
 Dies sind die zwei wichtigsten Merkmale,
 die wir gleich nutzen werden.
 
-Zunächst definieren wir die Variable |PROJECT|,
+Zunächst definieren wir die Variable \texttt{PROJECT},
 die den Dateinamen der Hauptdatei unseres \LaTeX -Projekts beinhaltet.
 \begin{lstlisting}[style=number]
 PROJECT  = dtk-make-bossert
@@ -52,26 +52,26 @@ Nun wollen wir den Arbeitsschritt zum Erstellen der PDF einbauen.
 all:
     lualatex $(PROJECT)
 \end{lstlisting}
-Mit |all:| wird ein \enquote{Ziel} angegeben.
+Mit |all| wird ein \enquote{Ziel} angegeben.
 In diesem Fall ist es die Standardausführung,
 wenn keine weiteren Angaben beim Ausführen der
 \texttt{makefile-}Datei gemacht werden.
 Alle folgenden Zeilen, die zu diesem \enquote{Ziel} gehören,
 werden mit einem Tab eingerückt.
-Mit |lualatex \$(PROJECT)| wird die oben definierte
-Variable aufgerufen, sodass |lualatex dtk-make-bossert|
+Mit \texttt{lualatex \$(PROJECT)} wird die oben definierte
+Variable aufgerufen, sodass \texttt{lualatex dtk-make-bossert}
 ausgeführt wird.
 
 Um die \texttt{makefile-}Datei auszuführen,
 navigiert man im Terminal zum Hauptordner des \LaTeX -Projects
-und führt lediglich den Befehl |make| aus.
+und führt lediglich den Befehl \texttt{make} aus.
 
 
 \section{Weitere Variablen und Arbeitsanweisen in der \texttt{makefile-}Datei}
 Nach dieser kurzen Einführung können wir verschiedene \enquote{Ziele}
 basteln, um sie bei Bedarf oder immer ausführen zu lassen.
 
-Es empfielt sich anzugeben, wo |make| die Shell findet.
+Es empfielt sich anzugeben, wo \texttt{make} die Shell findet.
 Dies erfolgt mit einer Variable.
 \begin{lstlisting}[style=number]
 SHELL = bash
@@ -84,7 +84,7 @@ um die Lesbarkeit der Informationsdarstellung zu erhöhen.
 RED   = \033[0;31m
 CYAN  = \033[0;36m
 NC    = \033[0m # No color
-echoPROJECT = @echo -e "$(CYAN)**** $(PROJECT) ****$(NC) \n"
+echoPROJECT = @echo -e "$(CYAN) <$(PROJECT)>"
 \end{lstlisting}
 Die letzte Variable gibt im Terminal den Projectnamen farblich aus.
 
@@ -98,27 +98,33 @@ Jetzt das \enquote{Ziel} selbst.
 \begin{lstlisting}[style=number]
 article:
 	$(echoPROJECT) "$(RED) * making article * $(NC)"
-	latexmk -lualatex -quiet -f -cd -view=pdf -output-directory=tmp/$(DATE) $(PROJECT).tex
+	latexmk -lualatex -quiet -f -cd -view=pdf -output-directory=tmp $(PROJECT).tex
 	@cp tmp/$(DATE)/$(PROJECT).pdf .
 	$(echoPROJECT) "$(RED) * article compiled * $(NC)"
 \end{lstlisting}
 Als erstes soll im Terminal angezeigt werden, welches \enquote{Ziel}
-von |make| gerade ausgeführt  wird (Z.2) bzw. abgeschlossen wurde (Z.6).
-Anschließend wird das PDF mittels |latexmk| erstellt, wozu weitere Optionen angegeben sind:
+von \texttt{make} gerade ausgeführt  wird (Z.2) bzw. abgeschlossen wurde (Z.6).
+Anschließend wird das PDF mittels \texttt{latexmk} erstellt, wozu weitere Optionen angegeben sind:
 Um den Hauptordner von allen temporären Dateien frei zu halten,
-werden diese in ein separates, datumsspezifisches Verzeichnis erstellt.
-Damit können Zwischenstände schnell und leicht (v.\,a. im jeweiligen PDF) nachgeschaut
-werden.
-Die PDF wird schließlich in den Hauptordner kopiert (Z. 5).
-Mit dem Präfix |@| wird die auszuführende Befehlszeile nicht
+werden diese in ein separates Verzeichnis erstellt.
+
+Das PDF wird schließlich in den Hauptordner kopiert (Z. 5).
+Mit dem Präfix \texttt{@} wird die auszuführende Befehlszeile nicht
 im Terminal angezeigt, lediglich deren Result.
-Mit |make article| lässt sich diese Passage direkt ansteuern und ausführen.
+Mit \texttt{make article} lässt sich diese Passage direkt ansteuern und ausführen.
 
 Besonders bei bildlastigen PDFs ist deren Dateigröße manchmal auch zu groß,
 um sie für Korrekturen etc. zu verschicken.
 Das PDF muss dann in einem weiteren Schritt komprimiert werden.
-Dieser Vorgang lässt sich ebenfalls von |make| mittels Ghostscript ausführen.\footnote{Zu den einzelnen Optionen des Ghostscriptbefehls s. XXX}
+Dieser Vorgang lässt sich ebenfalls von \texttt{make} mittels Ghostscript ausführen.\footnote{Zu den einzelnen Optionen des Ghostscriptbefehls s. XXX}
 
+Das \enquote{Ziel} ist \texttt{minimize} und als \enquote{Quelle}
+geben wir das oben formulierte \enquote{Ziel} \texttt{article} an.
+Das heißt, dass beim Aufruf von \texttt{minimize} zuerst das
+\enquote{Ziel} \texttt{article} ausgeführt wird -- Dank \texttt{latexmk} wird nur
+bei veränderter \texttt{.tex}-Datei neu übersetzt.
+Somit wird gewährleistet, dass  immer die neuste PDF-Version
+minimiert wird.
 \begin{lstlisting}[style=number]
 minimize: article
 	$(echoPROJECT) "$(RED) * minimizing article * $(NC)"
@@ -135,27 +141,169 @@ minimize: article
   $(PROJECT).pdf
 	$(echoPROJECT) "$(RED) * article minimized * $(NC)"
 \end{lstlisting}
-Zunächst wird ein Ordner |archive| erstellt (falls er schon existiert wird mit dem Präfix |-| zwar eine Fehlermeldung ausgegeben, diese führt jedoch nicht zum Abbruch des Befehls). Das PDF wird komprimiert und mit Datumsangabe im Ordner |archive| abgelegt.
+Zunächst wird ein Ordner \texttt{archive} erstellt (falls er schon existiert wird mit dem Präfix \texttt{-} zwar eine Fehlermeldung ausgegeben, diese führt jedoch nicht zum Abbruch des Befehls). Das PDF wird komprimiert und mit Datumsangabe im Ordner \texttt{archive} abgelegt.
 
+Um auch zugleich den Status quo des \LaTeX -Projects festzuhalten,
+kann man alle notwendige Dateien tagesaktuell zippen.
+Somit hat man immer den letzten Tagesstand im Ordner \texttt{archive} gesichert.
+Dafür bedarf es noch ein paar Variablen,
+die wir vorweg definieren.
 \begin{lstlisting}[style=number]
-count.colorpages: article
-	$(echoPROJECT) "$(RED) * counting colored pages * $(NC)"
-	@echo -e "Pages with color:"
-	@ gs -o - -sDEVICE=inkcov $(PROJECT).pdf | grep -v "^ 0.00000  0.00000  0.00000" | grep "^ " | wc -l
-	@ gs \
-  -o \
-  - \
-  -sDEVICE=inkcov \
-  $(PROJECT).pdf \
-  |tail -n +5 \
-  |sed '/^Page*/N;s/\n//'\
-  |sed -E '/Page [0-9]+ 0.00000 0.00000 0.00000 / d' \
-  | tee  $(PROJECT).csv
-	$(echoPROJECT) "$(RED) * colored pages counted * $(NC)"
+# zip
+PWD   = $(shell pwd)
+TEMP := $(shell mktemp -d -t tmp.XXXXXXXXXX)
+TDIR  = $(TEMP)/$(PROJECT)
+VERS  = $(shell /bin/date "+%Y-%m-%d---%H-%M-%S")
+DATE  = $(shell /bin/date "+%Y-%m-%d")
+\end{lstlisting}
+
+Das \enquote{Ziel} heißt \texttt{zip} und es wird wiederum
+zuerst \texttt{article} ausgeführt,
+um die aktuelle Projektversion zu zippen.
+\begin{lstlisting}[style=number]
+zip: article
+	$(echoPROJECT) "$(RED) * start zipping files * $(NC)"
+	@-mkdir archive
+	@rm -f archive/$(PROJECT)-$(DATE)*.zip
+	@mkdir $(TDIR)
+	@cp $(PROJECT).{bib,tex,pdf} README.md makefile $(TDIR)
+	cd $(TEMP); \
+	zip -Drq $(PWD)/archive/$(PROJECT)-$(VERS).zip $(PROJECT)
+	$(echoPROJECT) "$(RED) * files zipped * $(NC)"
 \end{lstlisting}
 
 
+Möchte man sein PDF an eine Druckerei geben,
+braucht man die genaue Anzahl der Farbseiten plus der Auflistung der Farben.
+Es wäre fatal (und unnötig), dies bei größeren PDFs von Hand zu tun.
+Folgende Code gibt eine Tabulator getrennte csv-Datei
+mit der prozentualen Farbabdeckung von jeder Seite.\footnote{\url{https://stackoverflow.com/a/28369599}}
+Damit kann man sehr leicht erkennen,
+ob das CMYK-Farbmodell korrekt ist und auf welchen Seiten
+\textcolor{cyan}{Cyan},
+\textcolor{magenta}{Magenta} oder
+\textcolor{yellow}{Gelb} (CMY) verwendet wird.\footnote{Man könnte diesen Code noch verbessern,
+indem man direkt eine kommaseparierte Liste ausgegeben bekommt,
+die die Seitenzahlen der Farbseiten aufzählt.}
+\begin{lstlisting}[style=number]
+count.colorpages: article
+	$(echoPROJECT) "$(RED) * counting colored pages * $(NC)"
+	@ gs \
+	-o - \
+	-sDEVICE=inkcov \
+	$(PROJECT).pdf \
+	|tail -n +5 \
+	|sed '/^Page*/N;s/\n//'\
+	|sed -E '/Page [0-9]+ 0.00000 0.00000 0.00000 / d' \
+	| tee  $(PROJECT).csv
+	@echo -e "Total amount of pages with color: "
+	@ gs -o - -sDEVICE=inkcov $(PROJECT).pdf | \
+	 grep -v "^ 0.00000  0.00000  0.00000" | grep "^ " | wc -l
+	$(echoPROJECT) "$(RED) * colored pages counted * $(NC)"
+\end{lstlisting}
+Die csv-Datei mit der Liste der Farbseiten für diesen Artikel sieht dann so aus:
+\begin{lstlisting}[style=noNumber]
+    Page 1 0.00000  0.00000  0.00000  0.12856 CMYK OK
+    Page 2 0.00000  0.00000  0.00000  0.27076 CMYK OK
+    Page 3 0.00000  0.00000  0.00000  0.34784 CMYK OK
+    Page 4 0.00016  0.00035  0.00017  0.44522 CMYK OK
+    Page 5 0.00000  0.00000  0.00000  0.60695 CMYK OK
+    Page 6 0.00000  0.00000  0.00000  0.49144 CMYK OK
+    Page 7 0.00000  0.00000  0.00000  0.00608 CMYK OK
+\end{lstlisting}
+
+Damit haben wir nun ein paar hilfreiche \enquote{Ziele} und
+Vorgehensweisen kennengelernt,
+die wir nun in eine \texttt{makefile}-Datei schreiben werden.
+
+\begin{lstlisting}[style=number]
+PROJECT  = dtk-make-bossert
+SHELL = bash
+MAKE  = make
+# zip
+PWD   = $(shell pwd)
+TEMP := $(shell mktemp -d -t tmp.XXXXXXXXXX)
+TDIR  = $(TEMP)/$(PROJECT)
+VERS  = $(shell /bin/date "+%Y-%m-%d---%H-%M-%S")
+DATE  = $(shell /bin/date "+%Y-%m-%d")
+# Colors
+RED   = \033[0;31m
+CYAN  = \033[0;36m
+NC    = \033[0m
+echoPROJECT = @echo -e "$(CYAN) <$(PROJECT)>"
+
+# default
+all:
+	$(MAKE) article
+	$(MAKE) minimize
+	$(MAKE) zip
+	$(MAKE) count.colorpages
+	$(echoPROJECT) "$(RED) * all files processed * $(NC)"
+
+# compile article
+article:
+	$(echoPROJECT) "$(RED) * making article * $(NC)"
+	latexmk -lualatex -quiet -f -cd -view=pdf -output-directory=tmp $(PROJECT).tex
+	@cp tmp/$(PROJECT).pdf .
+	$(echoPROJECT) "$(RED) * article compiled * $(NC)"
+
+# zip files for sending etc.
+zip: article
+	$(echoPROJECT) "$(RED) * start zipping files * $(NC)"
+	@-mkdir archive
+	@rm -f archive/$(PROJECT)-$(DATE)*.zip
+	@mkdir $(TDIR)
+	@cp $(PROJECT).{bib,tex,pdf} README.md makefile $(TDIR)
+	cd $(TEMP); \
+	zip -Drq $(PWD)/archive/$(PROJECT)-$(VERS).zip $(PROJECT)
+	$(echoPROJECT) "$(RED) * files zipped * $(NC)"
+
+# count pages with colors > https://stackoverflow.com/a/28369599
+count.colorpages: article
+	$(echoPROJECT) "$(RED) * counting colored pages * $(NC)"
+	@ gs \
+	-o - \
+	-sDEVICE=inkcov \
+	$(PROJECT).pdf \
+	|tail -n +5 \
+	|sed '/^Page*/N;s/\n//'\
+	|sed -E '/Page [0-9]+ 0.00000 0.00000 0.00000 / d' \
+	| tee  $(PROJECT).csv
+	@echo -e "Total amount of pages with color: "
+	@ gs -o - -sDEVICE=inkcov $(PROJECT).pdf | \
+	 grep -v "^ 0.00000  0.00000  0.00000" | grep "^ " | wc -l
+	$(echoPROJECT) "$(RED) * colored pages counted * $(NC)"
+
+# minimize PDF
+minimize: article
+	$(echoPROJECT) "$(RED) * minimizing article * $(NC)"
+	@-mkdir archive
+	@rm -f archive/$(PROJECT)-$(DATE)*.pdf
+	gs \
+  -sDEVICE=pdfwrite \
+  -dCompatibilityLevel=1.4 \
+  -dPDFSETTINGS=/printer \
+  -dNOPAUSE \
+  -dQUIET \
+  -dBATCH \
+  -sOutputFile=archive/$(PROJECT)-$(VERS).pdf \
+  $(PROJECT).pdf
+	$(echoPROJECT) "$(RED) * article minimized * $(NC)"
+\end{lstlisting}
+
 \section{Der Einsatz von \texttt{make}}
+Wie bereits erwähnt, wird das \enquote{Ziel} \texttt{all} ausgeführt,
+wenn man im Terminal lediglich \texttt{make} eingibt.
+In unserer Datei werden alle \enquote{Ziele} nun standardmäßig ausgeführt.
+% Um Rechenzeit zu sparen, laufen die \enquote{Ziele} \texttt{minimize},
+% \texttt{zip} und \texttt{count.colorpages} als Sub-Prozesse ab,
+% sobald die fertige PDF des \LaTeX -Projekts in den
+% Hauptordner kopiert wurde.
 
+Möchte man hingegen nur ein bestimmtes ||Ziel|| ausführen,
+kann man dieses mit |make <ZIEL>| direkt ansteuern,
+beispielsweise |make zip|.
 
+Diese |makefile|-Datei lässt sich nach Belieben ergänzen und verändern,
+um auch auf Projekt spezifische Anforderungen zu reagieren.
 \end{document}
