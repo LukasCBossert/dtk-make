@@ -10,31 +10,34 @@
 \Email{lukas@texografie.de}}
 \maketitle
 
-% Abstract ------
+\begin{abstract}
 Größere \LaTeX -Projekte mit vielen Dateien zu managen ist nicht immer einfach
-oder man muss verschiedene Schritte stets manuell ausführen.
-Beispielsweise wenn man die PDF zusätzlich noch in einer komprimierten
-Fassung haben möchte oder wissen muss, auf welchen Seiten Farbinformationen im PDF
+und man muss nach dem Übersetzen verschiedene Schritte ggf. manuell ausführen und das PDF weiter verarbeiten.
+Beispielsweise wenn man das PDF zusätzlich noch in einer komprimierten
+Fassung haben möchte oder wissen muss,
+auf welchen Seiten Farbinformationen im PDF
 hinterlegt sind.
 
-Die folgenden Ausführungen beziehen sich auf GNUmake (Unix/macOS).
-Für Windows gibt es eine entsprechende Variante \texttt{nmake}.
-% Abstract ------
+Die folgenden Ausführungen beziehen sich auf praxisnahe Funktionsweisen des Programms \texttt{GNUmake} (Unix/macOS).
+Für andere Betriebssysteme gibt es entsprechende Varianten (bspw. für Windows  \texttt{nmake}).
+\end{abstract}
 
+Mittels einer \texttt{makefile}-Datei und dem Programm \texttt{make} können mehrere Befehle gleichzeitig und/oder
+hintereinander ausgeführt werden,
+sodass verschiedene händische Arbeitsschritte abgenommen werden können.\footnote{Dieser Beitrag stellt eine Ergänzung zu
+\citetitle{dtk01.1:niepraschk:make} \parencite{dtk01.1:niepraschk:make} dar,
+da es hierbei um konkrete Beispiele (m)eines \LaTeX -Alltags geht.}
 
-Mittels einer \texttt{makefile-}Datei können mehrere Befehle gleichzeitig und/oder
-hintereinander ausgeführt werden, sodass verschiedene händische Arbeitsschritte abgenommen werden können.
-
-Zunächst erläutere ich die Eigenschaften und den Aufbau einer \texttt{makefile-}Datei.
+Zunächst erläutere ich die Eigenschaften und den Aufbau einer \texttt{makefile}-Datei.
 Anschließend zeige ich an kleinen Beispielen,
 worin das Potenzial dieser unscheinbaren Datei liegt.
 Mir ist weniger daran gelegen,
 die (durchaus komplexe) Logik bei den Abhängigkeiten von \enquote{Ziel}
-und \enquote{Quelle} (s.\,u.) zu durchdringen,
+und \enquote{Quelle} (s.\,u.) zu durchdringen \parencites{peschel-findelsen}{}
 als vielmehr einen praktisch orientierten Einblick zu geben.
 
-\section{Der Aufbau einer minimalen \texttt{makefile-}Datei}
-Eine \texttt{makefile-}Datei ist eine schlichte Textdatei \emph{ohne} Endung.
+\section{Der Aufbau einer minimalen \texttt{makefile}-Datei}
+Eine \texttt{makefile}-Datei ist eine schlichte Textdatei \emph{ohne} Endung.
 Sie liegt idealerweise im gleichen Ordner wie die Hauptdatei des \LaTeX -Projekts.
 Sie kann mit Variablen arbeiten und man kann alle Befehle ausführen lassen,
 die man auch im Terminal eingeben kann.
@@ -43,64 +46,82 @@ die wir gleich nutzen werden.
 
 Zunächst definieren wir die Variable \texttt{PROJECT},
 die den Dateinamen der Hauptdatei unseres \LaTeX -Projekts beinhaltet.
-\begin{lstlisting}[style=number]
+\begin{lstlisting}[style=number,language=make]
 PROJECT  = dtk-make-bossert
 \end{lstlisting}
 
 Nun wollen wir den Arbeitsschritt zum Erstellen der PDF einbauen.
-\begin{lstlisting}[style=number]
+\begin{lstlisting}[style=number,language=make]
 all:
     lualatex $(PROJECT)
 \end{lstlisting}
 Mit \texttt{all} wird ein \enquote{Ziel} angegeben.
 In diesem Fall ist es die Standardausführung,
 wenn keine weiteren Angaben beim Ausführen der
-\texttt{makefile-}Datei gemacht werden.
+\texttt{makefile}-Datei gemacht werden.
 Alle folgenden Zeilen, die zu diesem \enquote{Ziel} gehören,
 werden mit einem Tab eingerückt.
 Mit \texttt{lualatex \$(PROJECT)} wird die oben definierte
 Variable aufgerufen, sodass \texttt{lualatex dtk-make-bossert}
 ausgeführt wird.
 
-Um die \texttt{makefile-}Datei auszuführen,
+In der Reinform sieht ein Befehl also in etwa so aus.
+\begin{lstlisting}[style=noNumber]
+Ziel: Quelle(, ..., Quelle)
+    Befehl1
+    Befehl2
+    .
+\end{lstlisting}
+
+Um die \texttt{makefile}-Datei auszuführen,
 navigiert man im Terminal zum Hauptordner des \LaTeX -Projects
 und führt lediglich den Befehl \texttt{make} aus.
 
 
-\section{Weitere Variablen und Arbeitsanweisen in der \texttt{makefile-}Datei}
+\section{Weitere Variablen und Arbeitsanweisen in der \texttt{makefile}-Datei}
 Nach dieser kurzen Einführung können wir verschiedene \enquote{Ziele}
 basteln, um sie bei Bedarf oder immer ausführen zu lassen.
 
-Es empfielt sich anzugeben, wo \texttt{make} die Shell findet.
+Es empfielt sich anzugeben,
+wo \texttt{make} die Shell findet.
 Dies erfolgt mit einer Variable.
-\begin{lstlisting}[style=number]
+\begin{lstlisting}[style=number,language=make]
 SHELL = bash
 \end{lstlisting}
 
 Anschließend führen wir noch ein paar Farben ein,
 um die Lesbarkeit der Informationsdarstellung zu erhöhen.
-\begin{lstlisting}[style=number]
+\begin{lstlisting}[style=number,language=make]
 # Colors
 RED   = \033[0;31m
 CYAN  = \033[0;36m
 NC    = \033[0m # No color
 echoPROJECT = @echo -e "$(CYAN) <$(PROJECT)>"
 \end{lstlisting}
-Die letzte Variable gibt im Terminal den Projectnamen farblich aus.
+Die letzte Variable gibt im Terminal den Projektnamen farblich aus.
+
+Jetzt kommt noch die Definition von \texttt{PHONY}-Zielen \parencite[13--15]{gnu-make}.
+Anhand dieser Wortliste weiß \texttt{make},
+dass es sich hierbei nicht um Dateinamen handelt,
+sondern um auszuführende \enquote{Ziele}.
+\begin{lstlisting}[style=number,language=make]
+.PHONY: all article zip
+\end{lstlisting}
+
 
 Als erstes \enquote{Ziel} definieren wir die Erstellung des Artikels,
 wofür wir eine weitere Variable nutzen, die das aktuelle Datum abruft.
-\begin{lstlisting}[style=number]
+\begin{lstlisting}[style=number,language=make]
 DATE  = $(shell /bin/date "+%Y-%m-%d")
 \end{lstlisting}
 
 Jetzt das \enquote{Ziel} selbst.
-\begin{lstlisting}[style=number]
+\begin{lstlisting}[style=number,language=make]
 article:
-	$(echoPROJECT) "$(RED) * making article * $(NC)"
+	$(echoPROJECT) "* making article * $(NC)"
 	latexmk -lualatex -quiet -f -cd -view=pdf -output-directory=tmp $(PROJECT).tex
 	@cp tmp/$(DATE)/$(PROJECT).pdf .
-	$(echoPROJECT) "$(RED) * article compiled * $(NC)"
+	$(echoPROJECT) "* article compiled * $(NC)"
 \end{lstlisting}
 Als erstes soll im Terminal angezeigt werden, welches \enquote{Ziel}
 von \texttt{make} gerade ausgeführt  wird (Z.2) bzw. abgeschlossen wurde (Z.6).
@@ -125,9 +146,9 @@ Das heißt, dass beim Aufruf von \texttt{minimize} zuerst das
 bei veränderter \texttt{.tex}-Datei neu übersetzt.
 Somit wird gewährleistet, dass  immer die neuste PDF-Version
 minimiert wird.
-\begin{lstlisting}[style=number]
+\begin{lstlisting}[style=number,language=make]
 minimize: article
-	$(echoPROJECT) "$(RED) * minimizing article * $(NC)"
+	$(echoPROJECT) "* minimizing article * $(NC)"
 	@-mkdir archive
 	@rm -f archive/$(PROJECT)-$(DATE)*.pdf
 	gs \
@@ -139,7 +160,7 @@ minimize: article
   -dBATCH \
   -sOutputFile=archive/$(PROJECT)-$(VERS).pdf \
   $(PROJECT).pdf
-	$(echoPROJECT) "$(RED) * article minimized * $(NC)"
+	$(echoPROJECT) "* article minimized * $(NC)"
 \end{lstlisting}
 Zunächst wird ein Ordner \texttt{archive} erstellt (falls er schon existiert wird mit dem Präfix \texttt{-} zwar eine Fehlermeldung ausgegeben, diese führt jedoch nicht zum Abbruch des Befehls). Das PDF wird komprimiert und mit Datumsangabe im Ordner \texttt{archive} abgelegt.
 
@@ -148,7 +169,7 @@ kann man alle notwendige Dateien tagesaktuell zippen.
 Somit hat man immer den letzten Tagesstand im Ordner \texttt{archive} gesichert.
 Dafür bedarf es noch ein paar Variablen,
 die wir vorweg definieren.
-\begin{lstlisting}[style=number]
+\begin{lstlisting}[style=number,language=make]
 # zip
 PWD   = $(shell pwd)
 TEMP := $(shell mktemp -d -t tmp.XXXXXXXXXX)
@@ -160,18 +181,28 @@ DATE  = $(shell /bin/date "+%Y-%m-%d")
 Das \enquote{Ziel} heißt \texttt{zip} und es wird wiederum
 zuerst \texttt{article} ausgeführt,
 um die aktuelle Projektversion zu zippen.
-\begin{lstlisting}[style=number]
+\begin{lstlisting}[style=number,language=make]
 zip: article
-	$(echoPROJECT) "$(RED) * start zipping files * $(NC)"
+	$(echoPROJECT) "* zipping files * $(NC)"
 	@-mkdir archive
 	@rm -f archive/$(PROJECT)-$(DATE)*.zip
 	@mkdir $(TDIR)
 	@cp $(PROJECT).{bib,tex,pdf} README.md makefile $(TDIR)
 	cd $(TEMP); \
 	zip -Drq $(PWD)/archive/$(PROJECT)-$(VERS).zip $(PROJECT)
-	$(echoPROJECT) "$(RED) * files zipped * $(NC)"
+	$(echoPROJECT) "* files zipped * $(NC)"
 \end{lstlisting}
-
+In Zeile 6 ist eine sehr effiziente Syntax eingebaut:
+\begin{lstlisting}[style=noNumber,language=make]
+$(PROJECT).{bib,tex,pdf}
+\end{lstlisting}
+Dies ist gleichbedeutend mit
+\begin{lstlisting}[style=noNumber,language=make]
+$(PROJECT).bib $(PROJECT).tex $(PROJECT).pdf
+\end{lstlisting}
+Die kommaseparierten Werte in den geschweiften Klammern
+werden mit (in diesem Fall) dem Präfix gekoppelt.
+Somit spart man sich manche Tipparbeit.
 
 Möchte man sein PDF an eine Druckerei geben,
 braucht man die genaue Anzahl der Farbseiten plus der Auflistung der Farben.
@@ -185,9 +216,9 @@ ob das CMYK-Farbmodell korrekt ist und auf welchen Seiten
 \textcolor{yellow}{Gelb} (CMY) verwendet wird.\footnote{Man könnte diesen Code noch verbessern,
 indem man direkt eine kommaseparierte Liste ausgegeben bekommt,
 die die Seitenzahlen der Farbseiten aufzählt.}
-\begin{lstlisting}[style=number]
+\begin{lstlisting}[style=number,language=make]
 count.colorpages: article
-	$(echoPROJECT) "$(RED) * counting colored pages * $(NC)"
+	$(echoPROJECT) "* counting colored pages * $(NC)"
 	@ gs \
 	-o - \
 	-sDEVICE=inkcov \
@@ -199,100 +230,24 @@ count.colorpages: article
 	@echo -e "Total amount of pages with color: "
 	@ gs -o - -sDEVICE=inkcov $(PROJECT).pdf | \
 	 grep -v "^ 0.00000  0.00000  0.00000" | grep "^ " | wc -l
-	$(echoPROJECT) "$(RED) * colored pages counted * $(NC)"
+	$(echoPROJECT) "* colored pages counted * $(NC)"
 \end{lstlisting}
 Die csv-Datei mit der Liste der Farbseiten für diesen Artikel sieht dann so aus:
-\begin{lstlisting}[style=noNumber]
-    Page 1 0.00000  0.00000  0.00000  0.12856 CMYK OK
-    Page 2 0.00000  0.00000  0.00000  0.27076 CMYK OK
-    Page 3 0.00000  0.00000  0.00000  0.34784 CMYK OK
-    Page 4 0.00016  0.00035  0.00017  0.44522 CMYK OK
-    Page 5 0.00000  0.00000  0.00000  0.60695 CMYK OK
-    Page 6 0.00000  0.00000  0.00000  0.49144 CMYK OK
-    Page 7 0.00000  0.00000  0.00000  0.00608 CMYK OK
-\end{lstlisting}
-
-Damit haben wir nun ein paar hilfreiche \enquote{Ziele} und
-Vorgehensweisen kennengelernt,
-die wir nun in eine \texttt{makefile}-Datei schreiben werden.
-
-\begin{lstlisting}[style=number]
-PROJECT  = dtk-make-bossert
-SHELL = bash
-MAKE  = make
-# zip
-PWD   = $(shell pwd)
-TEMP := $(shell mktemp -d -t tmp.XXXXXXXXXX)
-TDIR  = $(TEMP)/$(PROJECT)
-VERS  = $(shell /bin/date "+%Y-%m-%d---%H-%M-%S")
-DATE  = $(shell /bin/date "+%Y-%m-%d")
-# Colors
-RED   = \033[0;31m
-CYAN  = \033[0;36m
-NC    = \033[0m
-echoPROJECT = @echo -e "$(CYAN) <$(PROJECT)>"
-
-# default
-all:
-	$(MAKE) article
-	$(MAKE) minimize
-	$(MAKE) zip
-	$(MAKE) count.colorpages
-	$(echoPROJECT) "$(RED) * all files processed * $(NC)"
-
-# compile article
-article:
-	$(echoPROJECT) "$(RED) * making article * $(NC)"
-	latexmk -lualatex -quiet -f -cd -view=pdf -output-directory=tmp $(PROJECT).tex
-	@cp tmp/$(PROJECT).pdf .
-	$(echoPROJECT) "$(RED) * article compiled * $(NC)"
-
-# zip files for sending etc.
-zip: article
-	$(echoPROJECT) "$(RED) * start zipping files * $(NC)"
-	@-mkdir archive
-	@rm -f archive/$(PROJECT)-$(DATE)*.zip
-	@mkdir $(TDIR)
-	@cp $(PROJECT).{bib,tex,pdf} README.md makefile $(TDIR)
-	cd $(TEMP); \
-	zip -Drq $(PWD)/archive/$(PROJECT)-$(VERS).zip $(PROJECT)
-	$(echoPROJECT) "$(RED) * files zipped * $(NC)"
-
-# count pages with colors > https://stackoverflow.com/a/28369599
-count.colorpages: article
-	$(echoPROJECT) "$(RED) * counting colored pages * $(NC)"
-	@ gs \
-	-o - \
-	-sDEVICE=inkcov \
-	$(PROJECT).pdf \
-	|tail -n +5 \
-	|sed '/^Page*/N;s/\n//'\
-	|sed -E '/Page [0-9]+ 0.00000 0.00000 0.00000 / d' \
-	| tee  $(PROJECT).csv
-	@echo -e "Total amount of pages with color: "
-	@ gs -o - -sDEVICE=inkcov $(PROJECT).pdf | \
-	 grep -v "^ 0.00000  0.00000  0.00000" | grep "^ " | wc -l
-	$(echoPROJECT) "$(RED) * colored pages counted * $(NC)"
-
-# minimize PDF
-minimize: article
-	$(echoPROJECT) "$(RED) * minimizing article * $(NC)"
-	@-mkdir archive
-	@rm -f archive/$(PROJECT)-$(DATE)*.pdf
-	gs \
-  -sDEVICE=pdfwrite \
-  -dCompatibilityLevel=1.4 \
-  -dPDFSETTINGS=/printer \
-  -dNOPAUSE \
-  -dQUIET \
-  -dBATCH \
-  -sOutputFile=archive/$(PROJECT)-$(VERS).pdf \
-  $(PROJECT).pdf
-	$(echoPROJECT) "$(RED) * article minimized * $(NC)"
-\end{lstlisting}
+\lstinputlisting[%
+   style       = number
+]{{dtk-make-bossert.csv}}
 
 \section{Der Einsatz von \texttt{make}}
-Wie bereits erwähnt, wird das \enquote{Ziel} \texttt{all} ausgeführt,
+Damit haben wir nun ein paar hilfreiche \enquote{Ziele} und
+Vorgehensweisen kennengelernt,
+die wir nun in eine \texttt{makefile}-Datei schreiben.
+
+\lstinputlisting[%
+   language    = make,
+   style       = number
+]{{makefile}}
+
+Wie bereits erwähnt, wird das \enquote{Ziel} \texttt{all} ausgeführt (weil es an erste Stelle steht),
 wenn man im Terminal lediglich \texttt{make} eingibt.
 In unserer Datei werden alle \enquote{Ziele} nun standardmäßig ausgeführt.
 % Um Rechenzeit zu sparen, laufen die \enquote{Ziele} \texttt{minimize},
@@ -306,4 +261,6 @@ beispielsweise \texttt{make zip}.
 
 Diese \texttt{makefile}-Datei lässt sich nach Belieben ergänzen und verändern,
 um auch auf Projekt spezifische Anforderungen zu reagieren.
+
+\printbibliography
 \end{document}

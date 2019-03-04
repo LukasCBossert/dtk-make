@@ -11,7 +11,9 @@ DATE  = $(shell /bin/date "+%Y-%m-%d")
 RED   = \033[0;31m
 CYAN  = \033[0;36m
 NC    = \033[0m
-echoPROJECT = @echo -e "$(CYAN) <$(PROJECT)>"
+echoPROJECT = @echo -e "$(CYAN) <$(PROJECT)>$(RED)"
+
+.PHONY: all article zip
 
 # default
 all:
@@ -19,29 +21,29 @@ all:
 	$(MAKE) minimize
 	$(MAKE) zip
 	$(MAKE) count.colorpages
-	$(echoPROJECT) "$(RED) * all files processed * $(NC)"
+	$(echoPROJECT) "* all files processed * $(NC)"
 
 # compile article
 article:
-	$(echoPROJECT) "$(RED) * making article * $(NC)"
+	$(echoPROJECT) "* making article * $(NC)"
 	latexmk -lualatex -quiet -f -cd -view=pdf -output-directory=tmp $(PROJECT).tex
 	@cp tmp/$(PROJECT).pdf .
-	$(echoPROJECT) "$(RED) * article compiled * $(NC)"
+	$(echoPROJECT) "* article compiled * $(NC)"
 
 # zip files for sending etc.
 zip: article
-	$(echoPROJECT) "$(RED) * start zipping files * $(NC)"
+	$(echoPROJECT) "* start zipping files * $(NC)"
 	@-mkdir archive
 	@rm -f archive/$(PROJECT)-$(DATE)*.zip
 	@mkdir $(TDIR)
 	@cp $(PROJECT).{bib,tex,pdf} README.md makefile $(TDIR)
 	cd $(TEMP); \
 	zip -Drq $(PWD)/archive/$(PROJECT)-$(VERS).zip $(PROJECT)
-	$(echoPROJECT) "$(RED) * files zipped * $(NC)"
+	$(echoPROJECT) "* files zipped * $(NC)"
 
 # count pages with colors > https://stackoverflow.com/a/28369599
 count.colorpages: article
-	$(echoPROJECT) "$(RED) * counting colored pages * $(NC)"
+	$(echoPROJECT) "* counting colored pages * $(NC)"
 	@ gs \
 	-o - \
 	-sDEVICE=inkcov \
@@ -53,11 +55,11 @@ count.colorpages: article
 	@echo -e "Total amount of pages with color: "
 	@ gs -o - -sDEVICE=inkcov $(PROJECT).pdf | \
 	 grep -v "^ 0.00000  0.00000  0.00000" | grep "^ " | wc -l
-	$(echoPROJECT) "$(RED) * colored pages counted * $(NC)"
+	$(echoPROJECT) "* colored pages counted * $(NC)"
 
 # minimize PDF
 minimize: article
-	$(echoPROJECT) "$(RED) * minimizing article * $(NC)"
+	$(echoPROJECT) "* minimizing article * $(NC)"
 	@-mkdir archive
 	@rm -f archive/$(PROJECT)-$(DATE)*.pdf
 	gs \
@@ -69,4 +71,4 @@ minimize: article
   -dBATCH \
   -sOutputFile=archive/$(PROJECT)-$(VERS).pdf \
   $(PROJECT).pdf
-	$(echoPROJECT) "$(RED) * article minimized * $(NC)"
+	$(echoPROJECT) "* article minimized * $(NC)"
