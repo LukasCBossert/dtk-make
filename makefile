@@ -44,17 +44,17 @@ zip: article
 
 count.colorpages: article
 	$(echoPROJECT) "$(RED) * counting colored pages * $(NC)"
-	@echo -e "Pages with color:"
-	@ gs -o - -sDEVICE=inkcov $(PROJECT).pdf | grep -v "^ 0.00000  0.00000  0.00000" | grep "^ " | wc -l
 	@ gs \
-  -o \
-  - \
-  -sDEVICE=inkcov \
-  $(PROJECT).pdf \
-  |tail -n +5 \
-  |sed '/^Page*/N;s/\n//'\
-  |sed -E '/Page [0-9]+ 0.00000 0.00000 0.00000 / d' \
-  | tee  $(PROJECT).csv
+	-o - \
+	-sDEVICE=inkcov \
+	$(PROJECT).pdf \
+	|tail -n +5 \
+	|sed '/^Page*/N;s/\n//'\
+	|sed -E '/Page [0-9]+ 0.00000 0.00000 0.00000 / d' \
+	| tee -a  $(PROJECT).csv
+	@echo -e "Pages with color: " | tee  $(PROJECT).csv
+	@ gs -o - -sDEVICE=inkcov $(PROJECT).pdf | \
+	 grep -v "^ 0.00000  0.00000  0.00000" | grep "^ " | wc -l
 	$(echoPROJECT) "$(RED) * colored pages counted * $(NC)"
 
 

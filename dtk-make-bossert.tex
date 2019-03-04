@@ -137,7 +137,22 @@ minimize: article
 \end{lstlisting}
 Zunächst wird ein Ordner |archive| erstellt (falls er schon existiert wird mit dem Präfix |-| zwar eine Fehlermeldung ausgegeben, diese führt jedoch nicht zum Abbruch des Befehls). Das PDF wird komprimiert und mit Datumsangabe im Ordner |archive| abgelegt.
 
-
+\begin{lstlisting}[style=number]
+count.colorpages: article
+	$(echoPROJECT) "$(RED) * counting colored pages * $(NC)"
+	@echo -e "Pages with color:"
+	@ gs -o - -sDEVICE=inkcov $(PROJECT).pdf | grep -v "^ 0.00000  0.00000  0.00000" | grep "^ " | wc -l
+	@ gs \
+  -o \
+  - \
+  -sDEVICE=inkcov \
+  $(PROJECT).pdf \
+  |tail -n +5 \
+  |sed '/^Page*/N;s/\n//'\
+  |sed -E '/Page [0-9]+ 0.00000 0.00000 0.00000 / d' \
+  | tee  $(PROJECT).csv
+	$(echoPROJECT) "$(RED) * colored pages counted * $(NC)"
+\end{lstlisting}
 
 
 \section{Der Einsatz von \texttt{make}}
