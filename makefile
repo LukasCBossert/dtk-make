@@ -26,7 +26,12 @@ all:
 # compile article
 article:
 	$(echoPROJECT) "* making article * $(NC)"
-	latexmk -lualatex -quiet -f -cd -view=pdf -output-directory=tmp $(PROJECT).tex
+	latexmk \
+	 -lualatex \
+	 -quiet \
+	 -view=pdf \
+	 -output-directory=tmp \
+	$(PROJECT).tex
 	@cp tmp/$(PROJECT).pdf .
 	$(echoPROJECT) "* article compiled * $(NC)"
 
@@ -37,25 +42,9 @@ zip: article
 	@rm -f archive/$(PROJECT)-$(DATE)*.zip
 	@mkdir $(TDIR)
 	@cp $(PROJECT).{bib,tex,pdf} README.md makefile $(TDIR)
-	cd $(TEMP); \
-	zip -Drq $(PWD)/archive/$(PROJECT)-$(VERS).zip $(PROJECT)
+	@cd $(TEMP); \
+	 zip -Drq $(PWD)/archive/$(PROJECT)-$(VERS).zip $(PROJECT)
 	$(echoPROJECT) "* files zipped * $(NC)"
-
-# count pages with colors > https://stackoverflow.com/a/28369599
-count.colorpages: article
-	$(echoPROJECT) "* counting colored pages * $(NC)"
-	@ gs \
-	-o - \
-	-sDEVICE=inkcov \
-	$(PROJECT).pdf \
-	|tail -n +5 \
-	|sed '/^Page*/N;s/\n//'\
-	|sed -E '/Page [0-9]+ 0.00000 0.00000 0.00000 / d' \
-	| tee  $(PROJECT).csv
-	@echo -e "Total amount of pages with color: "
-	@ gs -o - -sDEVICE=inkcov $(PROJECT).pdf | \
-	 grep -v "^ 0.00000  0.00000  0.00000" | grep "^ " | wc -l
-	$(echoPROJECT) "* colored pages counted * $(NC)"
 
 # minimize PDF
 minimize: article
@@ -72,3 +61,17 @@ minimize: article
   -sOutputFile=archive/$(PROJECT)-$(VERS).pdf \
   $(PROJECT).pdf
 	$(echoPROJECT) "* article minimized * $(NC)"
+
+	# count pages with colors > https://stackoverflow.com/a/28369599
+count.colorpages: article
+	$(echoPROJECT) "* counting colored pages * $(NC)"
+	@gs -o - -sDEVICE=inkcov $(PROJECT).pdf \
+	 | tail -n +5 \
+	 | sed '/^Page*/N;s/\n//' \
+	 | tee  $(PROJECT).csv
+	@echo -e "Total amount of pages with color: "
+	@gs -o - -sDEVICE=inkcov $(PROJECT).pdf \
+	 | grep -v "^ 0.00000  0.00000  0.00000" \
+	 | grep "^ " \
+	 | wc -l
+	$(echoPROJECT) "* colored pages counted * $(NC)"

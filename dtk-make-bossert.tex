@@ -143,7 +143,7 @@ Das \enquote{Ziel} ist \texttt{minimize} und als \enquote{Quelle}
 geben wir das oben formulierte \enquote{Ziel} \texttt{article} an.
 Das heißt, dass beim Aufruf von \texttt{minimize} zuerst das
 \enquote{Ziel} \texttt{article} ausgeführt wird -- Dank \texttt{latexmk} wird nur
-bei veränderter \texttt{.tex}-Datei neu übersetzt.
+bei veränderter \texttt{tex}-Datei neu übersetzt.
 Somit wird gewährleistet, dass  immer die neuste PDF-Version
 minimiert wird.
 \begin{lstlisting}[style=number,language=make]
@@ -162,7 +162,13 @@ minimize: article
   $(PROJECT).pdf
 	$(echoPROJECT) "* article minimized * $(NC)"
 \end{lstlisting}
-Zunächst wird ein Ordner \texttt{archive} erstellt (falls er schon existiert wird mit dem Präfix \texttt{-} zwar eine Fehlermeldung ausgegeben, diese führt jedoch nicht zum Abbruch des Befehls). Das PDF wird komprimiert und mit Datumsangabe im Ordner \texttt{archive} abgelegt.
+Zunächst wird ein Ordner \texttt{archive} erstellt (Z. 3).
+Sollte dieser Ordner bereits existieren,
+wirft \texttt{make} zwar einen Fehler,
+dieser wird jedoch dank des vorangestellten \texttt{-} bei \texttt{mkdir} nicht zum Abbruch des Skripts führen.
+In Zeile 4 wird ggf. eine ältere PDF gelöscht.
+Das PDF wird nun mit Ghostscript komprimiert (Z. 5\,ff.)
+und mit Datumsangabe im Dateinamen im Ordner \texttt{archive} abgelegt.
 
 Um auch zugleich den Status quo des \LaTeX -Projects festzuhalten,
 kann man alle notwendige Dateien tagesaktuell zippen.
@@ -188,11 +194,21 @@ zip: article
 	@rm -f archive/$(PROJECT)-$(DATE)*.zip
 	@mkdir $(TDIR)
 	@cp $(PROJECT).{bib,tex,pdf} README.md makefile $(TDIR)
-	cd $(TEMP); \
-	zip -Drq $(PWD)/archive/$(PROJECT)-$(VERS).zip $(PROJECT)
+	@cd $(TEMP); \
+	 zip -Drq $(PWD)/archive/$(PROJECT)-$(VERS).zip $(PROJECT)
 	$(echoPROJECT) "* files zipped * $(NC)"
 \end{lstlisting}
-In Zeile 6 ist eine sehr effiziente Syntax eingebaut:
+In Zeile 3 wird wiederum zuerst ein Ordner \texttt{archive} erstellt,
+in den später die gezippte Datei abgelegt wird.
+Mit Zeile 4 wird die tagesaktuelle Datei gelöscht,
+sodass für jeden Tag immer nur eine und die letzte Version in \texttt{archive} abgelegt wird.
+
+In den folgenden Zeilen wird der Packvorgang ausgeführt,
+zunächst erfolgt die Erstellung eines temporären Ordners,
+anschließend werden die zu zippenden Dateien ausgewählt
+ und schließlich die \texttt{zip}-Datei im Ordner \texttt{archive} abgelegt.
+
+In Zeile 6 ist eine sehr effiziente Syntax von \texttt{make} eingebaut:
 \begin{lstlisting}[style=noNumber,language=make]
 $(PROJECT).{bib,tex,pdf}
 \end{lstlisting}
@@ -201,13 +217,13 @@ Dies ist gleichbedeutend mit
 $(PROJECT).bib $(PROJECT).tex $(PROJECT).pdf
 \end{lstlisting}
 Die kommaseparierten Werte in den geschweiften Klammern
-werden mit (in diesem Fall) dem Präfix gekoppelt.
-Somit spart man sich manche Tipparbeit.
+werden expandiert und mit (in diesem Fall) dem Präfix  gekoppelt.
+Damit erspart man sich manche Tipparbeit.
 
 Möchte man sein PDF an eine Druckerei geben,
 braucht man die genaue Anzahl der Farbseiten plus der Auflistung der Farben.
 Es wäre fatal (und unnötig), dies bei größeren PDFs von Hand zu tun.
-Folgende Code gibt eine Tabulator getrennte csv-Datei
+Folgende Code gibt eine Tabulator getrennte \texttt{csv}-Datei
 mit der prozentualen Farbabdeckung von jeder Seite.\footnote{\url{https://stackoverflow.com/a/28369599}}
 Damit kann man sehr leicht erkennen,
 ob das CMYK-Farbmodell korrekt ist und auf welchen Seiten
@@ -218,24 +234,33 @@ indem man direkt eine kommaseparierte Liste ausgegeben bekommt,
 die die Seitenzahlen der Farbseiten aufzählt.}
 \begin{lstlisting}[style=number,language=make]
 count.colorpages: article
-	$(echoPROJECT) "* counting colored pages * $(NC)"
-	@ gs \
-	-o - \
-	-sDEVICE=inkcov \
-	$(PROJECT).pdf \
-	|tail -n +5 \
-	|sed '/^Page*/N;s/\n//'\
-	|sed -E '/Page [0-9]+ 0.00000 0.00000 0.00000 / d' \
-	| tee  $(PROJECT).csv
-	@echo -e "Total amount of pages with color: "
-	@ gs -o - -sDEVICE=inkcov $(PROJECT).pdf | \
-	 grep -v "^ 0.00000  0.00000  0.00000" | grep "^ " | wc -l
-	$(echoPROJECT) "* colored pages counted * $(NC)"
+  $(echoPROJECT) "* counting colored pages * $(NC)"
+  @gs -o - -sDEVICE=inkcov $(PROJECT).pdf \
+   | tail -n +5 \
+   | sed '/^Page*/N;s/\n//' \
+   | tee  $(PROJECT).csv
+  @echo -e "Total amount of pages with color: "
+  @gs -o - -sDEVICE=inkcov $(PROJECT).pdf \
+   | grep -v "^ 0.00000  0.00000  0.00000" \
+   | grep "^ " \
+   | wc -l
+  $(echoPROJECT) "* colored pages counted * $(NC)"
 \end{lstlisting}
-Die csv-Datei mit der Liste der Farbseiten für diesen Artikel sieht dann so aus:
+In Zeile 3 rufen wir Ghostscript auf lassen die Farbabdeckung jeder Seite ausgeben.
+Anschließend (Z. 4) werden die ersten fünf Zeilen dieser Liste gelöscht (es sind für unser Vorhaben nicht notwendige Metadaten),
+und schließlich (Z. 5) ein unschöner Absatz entfernt,
+sodass in Zeile 6 eine \texttt{csv}-Datei gespeichert wird.
+
+Die \texttt{csv}-Datei mit der Liste der Farbseiten für diesen Artikel sieht dann so aus:
 \lstinputlisting[%
    style       = number
 ]{{dtk-make-bossert.csv}}
+
+Mit dem nochmaligen Aufruf von Ghostscript in Zeile 8 und
+der direkten Weiterverarbeitung im Suchen/Ersetzen-Prinzip
+(\texttt{grep}),
+wird die Gesamtzahl der Farbseiten ermittelt.
+
 
 \section{Der Einsatz von \texttt{make}}
 Damit haben wir nun ein paar hilfreiche \enquote{Ziele} und
@@ -259,8 +284,7 @@ Möchte man hingegen nur ein bestimmtes \enquote{Ziel} ausführen,
 kann man dieses mit \texttt{make <ZIEL>} direkt ansteuern,
 beispielsweise \texttt{make zip}.
 
-Diese \texttt{makefile}-Datei lässt sich nach Belieben ergänzen und verändern,
-um auch auf Projekt spezifische Anforderungen zu reagieren.
-
+Diese \texttt{makefile}-Datei lässt sich nun nach Belieben ergänzen und verändern,
+um auch Projekt spezifische Anforderungen in der Nachbearbeitung effizient zu bearbeiten.
 \printbibliography
 \end{document}
