@@ -33,7 +33,7 @@ Anschließend zeige ich an kleinen Beispielen,
 worin das Potenzial dieser unscheinbaren Datei liegt.
 Mir ist weniger daran gelegen,
 die (durchaus komplexe) Logik bei den Abhängigkeiten von \enquote{Ziel}
-und \enquote{Quelle} (s.\,u.) zu durchdringen \parencites{peschel-findelsen}{}
+und \enquote{Quelle} (s.\,u.) zu durchdringen \parencite{peschel-findelsen}
 als vielmehr einen praktisch orientierten Einblick zu geben.
 
 \section{Der Aufbau einer minimalen \texttt{makefile}-Datei}
@@ -231,7 +231,7 @@ ob das CMYK-Farbmodell korrekt ist und auf welchen Seiten
 \textcolor{magenta}{Magenta} oder
 \textcolor{yellow}{Gelb} (CMY) verwendet wird.\footnote{Man könnte diesen Code noch verbessern,
 indem man direkt eine kommaseparierte Liste ausgegeben bekommt,
-die die Seitenzahlen der Farbseiten aufzählt.}
+die die Seitenzahlen der Farbseiten aufzählt; vgl. \url{https://stackoverflow.com/q/54991314/8584652}.}
 \begin{lstlisting}[style=number,language=make]
 count.colorpages: article
   $(echoPROJECT) "* counting colored pages * $(NC)"
@@ -249,7 +249,7 @@ count.colorpages: article
 In Zeile 3 rufen wir Ghostscript auf lassen die Farbabdeckung jeder Seite ausgeben.
 Anschließend (Z. 4) werden die ersten fünf Zeilen dieser Liste gelöscht (es sind für unser Vorhaben nicht notwendige Metadaten),
 und schließlich (Z. 5) ein unschöner Absatz entfernt,
-sodass in Zeile 6 eine \texttt{csv}-Datei gespeichert wird.
+sodass in Zeile 6 das Speichern einer \texttt{csv}-Datei ausgeführt wird.
 
 Die \texttt{csv}-Datei mit der Liste der Farbseiten für diesen Artikel sieht dann so aus:
 \lstinputlisting[%
