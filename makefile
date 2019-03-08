@@ -62,18 +62,25 @@ minimize: article
   $(PROJECT).pdf
 	$(echoPROJECT) "* article minimized * $(NC)"
 
-	# count pages with colors > https://stackoverflow.com/a/28369599
-count.colorpages: article
+# count pages with colors
+# > https://stackoverflow.com/a/28369599
+# > https://stackoverflow.com/q/54991314
+count.colorpages:
 	$(echoPROJECT) "* listing and counting colored pages * $(NC)"
+	@echo "Meta information about colors in $(PROJECT): "
 	@gs -o - -sDEVICE=inkcov $(PROJECT).pdf \
 	 | tail -n +5 \
 	 | sed '/^Page*/N;s/\n//' \
-	 | tee  $(PROJECT).csv \
+	 | tee $(PROJECT).csv
+	@echo -n "List of pages with colors: "
+	@cat $(PROJECT).csv \
 	 | awk '$$3!="0.00000" ||  $$4!="0.00000" || $$5!="0.00000"{if(length(colored))colored=colored","$$2;else colored=$$2} END{print colored}' \
 	 | tee  -a $(PROJECT).csv
-	@echo -e "Total amount of pages with color: "
+	@echo -n "Total amount of pages with color: "
 	@gs -o - -sDEVICE=inkcov $(PROJECT).pdf \
 	 | grep -v "^ 0.00000  0.00000  0.00000" \
 	 | grep "^ " \
-	 | wc -l
+	 | wc -l \
+	 | sed 's/[[:space:]]//g' \
+	 | tee  -a $(PROJECT).csv
 	$(echoPROJECT) "* colored pages listed and counted * $(NC)"

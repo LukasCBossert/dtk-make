@@ -229,32 +229,34 @@ Damit kann man sehr leicht erkennen,
 ob das CMYK-Farbmodell korrekt ist und auf welchen Seiten
 \textcolor{cyan}{Cyan},
 \textcolor{magenta}{Magenta} oder
-\textcolor{yellow}{Gelb} (CMY) verwendet wird.\footnote{Man könnte diesen Code noch verbessern,
-indem man direkt eine kommaseparierte Liste ausgegeben bekommt,
-die die Seitenzahlen der Farbseiten aufzählt; vgl. \url{https://stackoverflow.com/q/54991314/8584652}.}
+\textcolor{yellow}{Gelb} (CMY) verwendet wird.
 \begin{lstlisting}[style=number,language=make]
-count.colorpages: article
-  $(echoPROJECT) "* counting colored pages * $(NC)"
-  @gs -o - -sDEVICE=inkcov $(PROJECT).pdf \
-   | tail -n +5 \
-   | sed '/^Page*/N;s/\n//' \
-   | tee  $(PROJECT).csv
-  @echo -e "Total amount of pages with color: "
-  @gs -o - -sDEVICE=inkcov $(PROJECT).pdf \
-   | grep -v "^ 0.00000  0.00000  0.00000" \
-   | grep "^ " \
-   | wc -l
-  $(echoPROJECT) "* colored pages counted * $(NC)"
+count.colorpages:
+	$(echoPROJECT) "* listing and counting colored pages * $(NC)"
+	@echo "Meta information about colors in $(PROJECT): "
+	@gs -o - -sDEVICE=inkcov $(PROJECT).pdf \
+	 | tail -n +5 \
+	 | sed '/^Page*/N;s/\n//' \
+	 | tee $(PROJECT).csv
+	@echo -n "List of pages with colors: "
+	@cat $(PROJECT).csv \
+	 | awk '$$3!="0.00000" ||  $$4!="0.00000" || $$5!="0.00000"{if(length(colored))colored=colored","$$2;else colored=$$2} END{print colored}' \
+	 | tee  -a $(PROJECT).csv
+	@echo -n "Total amount of pages with color: "
+	@gs -o - -sDEVICE=inkcov $(PROJECT).pdf \
+	 | grep -v "^ 0.00000  0.00000  0.00000" \
+	 | grep "^ " \
+	 | wc -l \
+	 | sed 's/[[:space:]]//g' \
+	 | tee  -a $(PROJECT).csv
+	$(echoPROJECT) "* colored pages listed and counted * $(NC)"
 \end{lstlisting}
 In Zeile 3 rufen wir Ghostscript auf lassen die Farbabdeckung jeder Seite ausgeben.
-Anschließend (Z. 4) werden die ersten fünf Zeilen dieser Liste gelöscht (es sind für unser Vorhaben nicht notwendige Metadaten),
+Anschließend (Z. 4) werden die ersten fünf Zeilen dieser Liste gelöscht
+(es sind für unser Vorhaben nicht notwendige Metadaten),
 und schließlich (Z. 5) ein unschöner Absatz entfernt,
 sodass in Zeile 6 das Speichern einer \texttt{csv}-Datei ausgeführt wird.
 
-Die \texttt{csv}-Datei mit der Liste der Farbseiten für diesen Artikel sieht dann so aus:
-\lstinputlisting[%
-   style       = number
-]{{dtk-make-bossert.csv}}
 
 Mit dem nochmaligen Aufruf von Ghostscript in Zeile 8 und
 der direkten Weiterverarbeitung im Suchen/Ersetzen-Prinzip
@@ -262,10 +264,18 @@ der direkten Weiterverarbeitung im Suchen/Ersetzen-Prinzip
 wird die Gesamtzahl der Farbseiten ermittelt.
 
 
+Die \texttt{csv}-Datei mit der Liste der Farbseiten für diesen Artikel sieht dann so aus;
+am Ende stehen die kommaseparierten Farbseiten und schließelich die Gesamtanzahl
+an Farbseiten.
+\lstinputlisting[%
+   style       = number
+]{{dtk-make-bossert.csv}}
+
+
 \section{Der Einsatz von \texttt{make}}
 Damit haben wir nun ein paar hilfreiche \enquote{Ziele} und
 Vorgehensweisen kennengelernt,
-die wir nun in eine \texttt{makefile}-Datei schreiben.
+die wir nun in eine \texttt{makefile}-Datei schreiben.\footnote{Diese \texttt{makefile}-Datei ist auch online verfügbar: \url{https://github.com/LukasCBossert/dtk-make/blob/master/makefile}.}
 
 \lstinputlisting[%
    language    = make,
