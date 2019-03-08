@@ -64,14 +64,16 @@ minimize: article
 
 	# count pages with colors > https://stackoverflow.com/a/28369599
 count.colorpages: article
-	$(echoPROJECT) "* counting colored pages * $(NC)"
+	$(echoPROJECT) "* listing and counting colored pages * $(NC)"
 	@gs -o - -sDEVICE=inkcov $(PROJECT).pdf \
 	 | tail -n +5 \
 	 | sed '/^Page*/N;s/\n//' \
-	 | tee  $(PROJECT).csv
+	 | tee  $(PROJECT).csv \
+	 | awk '$$3!="0.00000" ||  $$4!="0.00000" || $$5!="0.00000"{if(length(colored))colored=colored","$$2;else colored=$$2} END{print colored}' \
+	 | tee  -a $(PROJECT).csv
 	@echo -e "Total amount of pages with color: "
 	@gs -o - -sDEVICE=inkcov $(PROJECT).pdf \
 	 | grep -v "^ 0.00000  0.00000  0.00000" \
 	 | grep "^ " \
 	 | wc -l
-	$(echoPROJECT) "* colored pages counted * $(NC)"
+	$(echoPROJECT) "* colored pages listed and counted * $(NC)"
