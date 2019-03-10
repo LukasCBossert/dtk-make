@@ -118,7 +118,7 @@ DATE  = $(shell /bin/date "+%Y-%m-%d")
 Jetzt das \enquote{Ziel} selbst.
 \begin{lstlisting}[style=number,language=make]
 article:
-	$(echoPROJECT) "* compiling article * $(NC)"
+	$(echoPROJECT) "* making article * $(NC)"
 	latexmk -lualatex -quiet -f -cd -view=pdf -output-directory=tmp $(PROJECT).tex
 	@cp tmp/$(DATE)/$(PROJECT).pdf .
 	$(echoPROJECT) "* article compiled * $(NC)"
@@ -233,7 +233,7 @@ ob das CMYK-Farbmodell korrekt ist und auf welchen Seiten
 \begin{lstlisting}[style=number,language=make]
 count.colorpages:
 	$(echoPROJECT) "* listing and counting colored pages * $(NC)"
-	@echo "Meta information about colors in $(PROJECT)"
+	@echo "Meta information about colors in $(PROJECT): "
 	@gs -o - -sDEVICE=inkcov $(PROJECT).pdf \
 	 | tail -n +5 \
 	 | sed '/^Page*/N;s/\n//' \
@@ -257,17 +257,16 @@ Anschließend (Z. 4) werden die ersten fünf Zeilen dieser Liste gelöscht
 und schließlich (Z. 5) ein unschöner Absatz entfernt,
 sodass in Zeile 6 das Speichern einer \texttt{csv}-Datei ausgeführt wird.
 
-Schließlich werden alle Farbseiten
-kommaseparierte aufgelistet und ebenfalls in der \texttt{csv}-Datei ergänzt (Z.8--11).
 
-Mit dem nochmaligen Aufruf von Ghostscript in Zeile 12 und
+Mit dem nochmaligen Aufruf von Ghostscript in Zeile 8 und
 der direkten Weiterverarbeitung im Suchen/Ersetzen-Prinzip
 (\texttt{grep}),
 wird die Gesamtzahl der Farbseiten ermittelt.
-Diese Zahl wird in die letzte Zeile der \texttt{csv}-Datei geschrieben.
 
 
-Die \texttt{csv}-Datei mit der Liste der Farbseiten für diesen Artikel sieht dann so aus.
+Die \texttt{csv}-Datei mit der Liste der Farbseiten für diesen Artikel sieht dann so aus;
+am Ende stehen die kommaseparierten Farbseiten und schließelich die Gesamtanzahl
+an Farbseiten.
 \lstinputlisting[%
    style       = number
 ]{{dtk-make-bossert.csv}}
