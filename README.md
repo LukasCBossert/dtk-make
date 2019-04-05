@@ -1,7 +1,7 @@
 dtk-make-bossert
 ===
 
-[![CircleCI](https://circleci.com/gh/lukascbossert/dtk-make.svg?style=svg)](https://circleci.com/gh/LukasCBossert/dtk-make)
+[![CircleCI](https://circleci.com/gh/LukasCBossert/dtk-make.svg?style=svg)](https://circleci.com/gh/LukasCBossert/dtk-make)
 
 Dies ist ein Repositorium, bei dem es vor allem um die `makefile` geht.
 
