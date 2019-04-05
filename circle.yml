@@ -8,6 +8,3 @@ jobs:
        - run: make
        - store_artifacts:
            path: archive/
-            run: git add -a
-            run: git commit -m "built and uploaded by CI"
-            run: git push
