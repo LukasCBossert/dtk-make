@@ -1,6 +1,8 @@
 dtk-make-bossert
 ===
 
+[![CircleCI](https://circleci.com/gh/lukascbossert/dtk-make.svg?style=svg)](https://circleci.com/gh/LukasCBossert/dtk-make)
+
 Dies ist ein Repositorium, bei dem es vor allem um die `makefile` geht.
 
 Um die `makefile` zu nutzen, tippe im Terminal ein:
