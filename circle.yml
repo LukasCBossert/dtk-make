@@ -8,7 +8,7 @@ jobs:
        - run: make
        - deploy:
           name: circleCI build
-          command:
+          command: |
             git add .
             git commit -m "built by circleCI"
             # Push quietly to prevent showing the token in log
