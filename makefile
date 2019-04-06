@@ -13,7 +13,7 @@ CYAN  = \033[0;36m
 NC    = \033[0m
 echoPROJECT = @echo -e "$(CYAN) <$(PROJECT)>$(RED)"
 
-.PHONY: all article zip
+.PHONY: all article zip test
 
 # default
 all:
@@ -23,6 +23,9 @@ all:
 	$(MAKE) count.colorpages
 	$(echoPROJECT) "* all files processed * $(NC)"
 
+test:
+	lualatex $(PROJECT)
+	
 # compile article
 article:
 	$(echoPROJECT) "* compiling article * $(NC)"
