@@ -13,4 +13,3 @@ jobs:
             git config user.name "Lukas C. Bossert"		
             git add .
             git commit -m "built by circleCI"
-            git push
