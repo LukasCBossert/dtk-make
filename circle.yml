@@ -14,4 +14,4 @@ jobs:
             git config user.name "Deployment Bot"
             git commit --allow-empty -m "Trigger deployment"
             # Push quietly to prevent showing the token in log
-            git push -q master
+            git push -q
