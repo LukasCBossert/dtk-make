@@ -13,3 +13,5 @@ jobs:
             git config user.name "Lukas C. Bossert"		
             git add .
             git commit -m "built by circleCI"
+	    - store_artifacts:
+           path: build/
