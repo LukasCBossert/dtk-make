@@ -5,11 +5,12 @@ jobs:
        - image: danteev/texlive
      steps:
        - checkout
-       - run: make
+       - run: make test
        - deploy:
           name: circleCI build
           command: |
+            git config user.email "lukas@digitales-altertum.de"		
+            git config user.name "Lukas C. Bossert"		
             git add .
             git commit -m "built by circleCI"
-            # Push quietly to prevent showing the token in log
-            git push -q
+            git push
