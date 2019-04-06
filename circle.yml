@@ -7,12 +7,9 @@ jobs:
        - checkout
        - run: make
        - deploy:
-          name: CircleCI build
-          command: |
-            git config credential.helper 'cache --timeout=120'
-            git config user.email "lukas@digitales-altertum.de"
-            git config user.name "Deployment Bot"
+          name: circleCI build
+          command:
             git add .
-            git commit --allow-empty -m "Trigger deployment"
+            git commit -m "built by circleCI"
             # Push quietly to prevent showing the token in log
             git push -q
