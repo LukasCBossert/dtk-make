@@ -23,8 +23,6 @@ all:
 	$(MAKE) count.colorpages
 	$(echoPROJECT) "* all files processed * $(NC)"
 
-test:
-	lualatex $(PROJECT)
 	
 # compile article
 article:
